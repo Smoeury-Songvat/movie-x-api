@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Welcome!</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    .container { max-width: 520px; margin: 40px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+    .header { background: #E50914; padding: 28px 32px; text-align: center; }
+    .header h1 { color: #fff; margin: 0; font-size: 24px; }
+    .body { padding: 32px; color: #333; line-height: 1.6; }
+    .cta { display: inline-block; margin: 20px 0; padding: 14px 32px; background: #E50914; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; }
+    .footer { background: #f4f4f4; padding: 16px 32px; text-align: center; font-size: 12px; color: #888; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header"><h1>🎬 Welcome to {{appName}}!</h1></div>
+    <div class="body">
+      <p>Hi <strong>{{name}}</strong> 👋</p>
+      <p>Your account has been verified. You now have access to thousands of movies and shows.</p>
+      <p>Start exploring your favourite content right now.</p>
+      <a class="cta" href="#">Browse Movies</a>
+      <p style="font-size:13px;color:#888;">Happy watching! 🍿</p>
+    </div>
+    <div class="footer">© {{appName}} — Do not reply to this email.</div>
+  </div>
+</body>
+</html>
