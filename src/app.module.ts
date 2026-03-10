@@ -7,10 +7,16 @@ import { APP_GUARD } from '@nestjs/core';
 
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
-import { OtpCleanupTask } from './tasks/otp-cleanup.task';
-import { OtpService } from './auth/services/otp.service';
-import { OtpRecord } from './entities/otp-record.entity';
+import { MovieModule } from './movie/movie.module';
+import { ActorModule } from './actor/actor.module';
+import { GenreModule } from './genre/genre.module';
+import { SubscriptionModule } from './subscription/subscription.module';
+import { BillingModule } from './billing/billing.module';
+import { DownloadModule } from './download/download.module';
+import { TasksModule } from './tasks/tasks.module';
+
 import { User } from './entities/user.entity';
+import { OtpRecord } from './entities/otp-record.entity';
 import { SubscriptionPlan } from './entities/subscription-plan.entity';
 import { UserSubscription } from './entities/user-subscription.entity';
 import { PaymentMethod } from './entities/payment-method.entity';
@@ -23,8 +29,8 @@ import { DownloadedMovie } from './entities/downloaded-movie.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -36,23 +42,17 @@ import { DownloadedMovie } from './entities/downloaded-movie.entity';
         password: config.get('DB_PASSWORD', 'postgres'),
         database: config.get('DB_NAME', 'movieapp'),
         entities: [
-          User, SubscriptionPlan, UserSubscription, PaymentMethod,
+          User, OtpRecord, SubscriptionPlan, UserSubscription, PaymentMethod,
           Movie, MovieQualitySource, Genre, Actor, DownloadedMovie,
-          OtpRecord,
         ],
         migrations: ['dist/migrations/*.js'],
         synchronize: config.get('NODE_ENV') !== 'production',
         logging: config.get('NODE_ENV') === 'development',
       }),
     }),
-    TypeOrmModule.forFeature([OtpRecord]),
-    MailModule,
-    AuthModule,
+    MailModule, AuthModule, MovieModule, ActorModule, GenreModule,
+    SubscriptionModule, BillingModule, DownloadModule, TasksModule,
   ],
-  providers: [
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
-    OtpService,
-    OtpCleanupTask,
-  ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
