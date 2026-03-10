@@ -14,7 +14,11 @@ import { User } from '../../entities/user.entity';
 import { UserSubscription } from '../../entities/user-subscription.entity';
 import { SubscriptionStatus } from '../../entities/user-subscription.entity';
 import { PlanType } from '../../entities/subscription-plan.entity';
-import { CreateMovieDto, UpdateMovieDto, MovieFilterDto } from '../dto/movie.dto';
+import {
+  CreateMovieDto,
+  UpdateMovieDto,
+  MovieFilterDto,
+} from '../dto/movie.dto';
 import { PaginatedResponse } from '../../common/dto/paginated-response.dto';
 
 @Injectable()
@@ -64,7 +68,12 @@ export class MovieService {
     filter: MovieFilterDto,
     user?: User,
   ): Promise<PaginatedResponse<Movie>> {
-    const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'DESC' } = filter;
+    const {
+      page = 1,
+      limit = 20,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+    } = filter;
     const skip = (page - 1) * limit;
 
     const qb = this.buildFilterQuery(filter);
@@ -76,19 +85,25 @@ export class MovieService {
 
     if (!subscription || subscription.plan.type === PlanType.BASIC) {
       // Basic or unauthenticated: only LIMITED access movies
-      qb.andWhere('movie.access_level = :level', { level: MovieAccessLevel.LIMITED });
+      qb.andWhere('movie.access_level = :level', {
+        level: MovieAccessLevel.LIMITED,
+      });
     }
 
     // Allowed sort columns (prevent SQL injection via dynamic column)
     const allowedSort: Record<string, string> = {
       title: 'movie.title',
-      releaseDate: 'movie.release_date',
-      ratingScore: 'movie.rating_score',
-      viewCount: 'movie.view_count',
-      createdAt: 'movie.created_at',
+      releaseDate: 'movie.releaseDate',
+      ratingScore: 'movie.ratingScore',
+      viewCount: 'movie.viewCount',
+      createdAt: 'movie.createdAt',
     };
-    const orderColumn = allowedSort[sortBy] ?? 'movie.created_at';
-    qb.orderBy(orderColumn, sortOrder).skip(skip).take(limit);
+
+    const orderColumn = allowedSort[sortBy] ?? 'movie.createdAt';
+
+    const order = sortOrder?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    qb.orderBy(orderColumn, order).skip(skip).take(limit);
 
     const [data, total] = await qb.getManyAndCount();
     return new PaginatedResponse(data, total, page, limit);
@@ -136,8 +151,12 @@ export class MovieService {
       ...(dto.synopsis !== undefined && { synopsis: dto.synopsis }),
       ...(dto.thumbnailUrl !== undefined && { thumbnailUrl: dto.thumbnailUrl }),
       ...(dto.trailerUrl !== undefined && { trailerUrl: dto.trailerUrl }),
-      ...(dto.releaseDate !== undefined && { releaseDate: new Date(dto.releaseDate) }),
-      ...(dto.durationSeconds !== undefined && { durationSeconds: dto.durationSeconds }),
+      ...(dto.releaseDate !== undefined && {
+        releaseDate: new Date(dto.releaseDate),
+      }),
+      ...(dto.durationSeconds !== undefined && {
+        durationSeconds: dto.durationSeconds,
+      }),
       ...(dto.ratingScore !== undefined && { ratingScore: dto.ratingScore }),
       ...(dto.ratingSource !== undefined && { ratingSource: dto.ratingSource }),
       ...(dto.accessLevel !== undefined && { accessLevel: dto.accessLevel }),
@@ -200,7 +219,10 @@ export class MovieService {
     return qb;
   }
 
-  private async assertMovieAccessible(movie: Movie, user?: User): Promise<void> {
+  private async assertMovieAccessible(
+    movie: Movie,
+    user?: User,
+  ): Promise<void> {
     if (movie.accessLevel === MovieAccessLevel.LIMITED) return; // always accessible
 
     const subscription = user
@@ -219,7 +241,9 @@ export class MovieService {
     }
   }
 
-  async getUserActiveSubscription(userId: string): Promise<UserSubscription | null> {
+  async getUserActiveSubscription(
+    userId: string,
+  ): Promise<UserSubscription | null> {
     return this.subscriptionRepo.findOne({
       where: { userId, status: SubscriptionStatus.ACTIVE },
       relations: ['plan'],
